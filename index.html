@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080810">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Level Up">
+<title>Level Up 🚀</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#080810;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:70px;overflow-x:hidden;}
+button{font-family:inherit;cursor:pointer;}
+.glow1{position:fixed;top:-100px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,0.18)0%,transparent 70%);pointer-events:none;z-index:0;}
+.glow2{position:fixed;bottom:0;left:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,0.12)0%,transparent 70%);pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;}
+
+#xpPop{position:fixed;top:15%;left:50%;transform:translateX(-50%);z-index:999;font-size:20px;font-weight:900;background:rgba(0,0,0,0.85);padding:10px 22px;border-radius:99px;pointer-events:none;opacity:0;transition:opacity 0.3s;}
+#xpPop.show{opacity:1;}
+
+#failBanner{margin:12px 16px 0;padding:12px 16px;background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);border-radius:14px;font-size:13px;color:#fca5a5;line-height:1.5;display:none;}
+
+.header{padding:32px 20px 16px;}
+.hrow{display:flex;justify-content:space-between;align-items:flex-start;}
+.lvllabel{font-size:11px;letter-spacing:3px;color:#6366f1;font-weight:800;text-transform:uppercase;margin-bottom:3px;}
+.apptitle{font-size:28px;font-weight:900;letter-spacing:-0.5px;}
+.xpdisp{font-size:22px;font-weight:900;color:#fbbf24;text-align:right;}
+.xpdisp span{font-size:12px;color:rgba(255,204,0,0.5);font-weight:400;}
+.streakl{font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;}
+.lbarbg{margin-top:12px;background:rgba(255,255,255,0.07);border-radius:99px;height:7px;overflow:hidden;}
+.lbar{height:100%;background:linear-gradient(90deg,#6366f1,#fbbf24);border-radius:99px;transition:width 0.5s;width:0%;}
+.lbarlab{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:rgba(255,255,255,0.3);}
+
+.summary{margin:0 20px 16px;padding:14px 18px;background:rgba(255,255,255,0.04);border-radius:18px;border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:14px;}
+.scount{font-size:30px;font-weight:900;}
+.scount span{font-size:15px;color:rgba(255,255,255,0.3);font-weight:400;}
+.sbarbg{margin-top:6px;background:rgba(255,255,255,0.07);border-radius:99px;height:5px;width:100%;}
+.sbar{height:100%;background:linear-gradient(90deg,#6366f1,#34d399);border-radius:99px;transition:width 0.4s;}
+
+.tabs{display:flex;gap:8px;padding:0 20px 16px;}
+.tbtn{flex:1;padding:9px 0;border-radius:99px;border:none;font-size:12px;font-weight:700;transition:all 0.2s;}
+.tbtn.on{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;}
+.tbtn.off{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);}
+
+.tcontent{padding:0 20px;display:none;}
+.tcontent.on{display:block;}
+
+.taskwrap{transition:transform 0.4s,opacity 0.4s;transform-origin:top left;margin-bottom:10px;}
+.tcard{border-radius:16px;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);transition:all 0.3s;position:relative;overflow:hidden;}
+.tcard.done{background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.3);}
+.tcard.shrunk{background:rgba(248,113,113,0.07);border-color:rgba(248,113,113,0.25);}
+.trow{display:flex;align-items:center;gap:10px;}
+.temoji{font-size:22px;}
+.tinfo{flex:1;}
+.ttitle{font-weight:700;font-size:14px;}
+.ttitle.done{text-decoration:line-through;color:rgba(255,255,255,0.4);}
+.ttags{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;}
+.tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;}
+.tagxp{color:#fbbf24;background:rgba(251,191,36,0.15);}
+.tagshrink{color:#f87171;background:rgba(248,113,113,0.15);}
+.tbtns{display:flex;gap:6px;}
+.bfail{width:34px;height:34px;border-radius:50%;border:1px solid rgba(248,113,113,0.3);background:rgba(248,113,113,0.1);color:#f87171;font-size:16px;}
+.bcheck{width:34px;height:34px;border-radius:50%;border:none;color:#fff;font-size:16px;font-weight:700;}
+.celover{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:40px;background:rgba(0,0,0,0.5);border-radius:16px;z-index:5;}
+.celover.show{display:flex;}
+.hintbox{margin-top:8px;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:12px;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.7;}
+
+.pucard{margin-bottom:14px;border-radius:18px;padding:18px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);}
+.pucard.avail{background:rgba(255,255,255,0.05);border-color:rgba(249,115,22,0.35);}
+.pucard.done{background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.3);}
+.setsrow{display:flex;gap:8px;margin-bottom:12px;}
+.setbox{flex:1;height:36px;border-radius:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:rgba(255,255,255,0.3);transition:all 0.3s;}
+.setbox.done{background:linear-gradient(135deg,#f97316,#fbbf24);border-color:transparent;color:#000;}
+.bpullup{width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#f97316,#fbbf24);color:#000;font-size:15px;font-weight:900;}
+.sectitle{font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+
+.ibox{padding:18px;border-radius:18px;margin-bottom:14px;}
+.ibox-w{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);}
+.ibox-r{background:rgba(248,113,113,0.07);border:1px solid rgba(248,113,113,0.2);}
+.ibox-b{background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.2);}
+.ititle{font-weight:800;font-size:15px;margin-bottom:12px;}
+.isub{font-weight:700;font-size:13px;color:#818cf8;margin-bottom:4px;}
+.itext{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.itext.last{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.alrow{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.altime{font-weight:700;font-size:13px;color:#818cf8;min-width:40px;}
+.allabel{font-size:12px;color:rgba(255,255,255,0.5);}
+</style>
+</head>
+<body>
+<div class="glow1"></div>
+<div class="glow2"></div>
+<div class="wrap">
+
+<div id="xpPop"></div>
+<div id="failBanner">😬 Gestern nicht alles geschafft — heute besser machen!</div>
+
+<div class="header">
+  <div class="hrow">
+    <div>
+      <div class="lvllabel" id="lvlLabel">Level 1 · Anfänger</div>
+      <div class="apptitle">Level Up 🚀</div>
+    </div>
+    <div>
+      <div class="xpdisp"><span id="xpNum">0</span> <span>XP</span></div>
+      <div class="streakl">🔥 <span id="streakNum">0</span> Tage</div>
+    </div>
+  </div>
+  <div class="lbarbg"><div class="lbar" id="lvlBar"></div></div>
+  <div class="lbarlab"><span id="xpCur">0 XP</span><span id="xpNext">Nächstes: 100 XP</span></div>
+</div>
+
+<div class="summary">
+  <div class="scount" id="sCount">0<span id="sTotal">/0</span></div>
+  <div style="flex:1">
+    <div style="font-weight:700;font-size:14px">Aufgaben heute</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px" id="sLabel">Laden…</div>
+    <div class="sbarbg"><div class="sbar" id="sBar" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tbtn on" onclick="switchTab('tasks')">Aufgaben ✅</button>
+  <button class="tbtn off" onclick="switchTab('sport')">Sport 💪</button>
+  <button class="tbtn off" onclick="switchTab('info')">Info ℹ️</button>
+</div>
+
+<div id="tab-tasks" class="tcontent on">
+  <div id="taskList"></div>
+  <div class="hintbox">✗ = Nicht geschafft → Aufgabe <b style="color:#f87171">schrumpft</b> & XP-Verlust<br>✓ = Erledigt → XP verdient & Streak steigt 🔥</div>
+</div>
+
+<div id="tab-sport" class="tcontent">
+  <div id="pullupCard"></div>
+  <div class="sectitle">Heutige Sport-Aufgaben</div>
+  <div id="sportList"></div>
+</div>
+
+<div id="tab-info" class="tcontent">
+  <div class="ibox ibox-w">
+    <div class="ititle">📱 Als Homescreen-App speichern</div>
+    <div class="isub">Android (Chrome)</div>
+    <div class="itext">Chrome → diese Seite öffnen → Menü (3 Punkte) → "Zum Startbildschirm hinzufügen" → Fertig! Danach wie eine echte App öffnen.</div>
+    <div class="isub">iPhone (Safari)</div>
+    <div class="itext last">Safari → Teilen-Symbol → "Zum Home-Bildschirm" → Hinzufügen.</div>
+  </div>
+  <div class="ibox ibox-r">
+    <div class="ititle">📵 15-Min Limit für Social Media</div>
+    <div class="itext last">
+      <b style="color:#fbbf24">Android:</b> Einstellungen → Digital Wellbeing → App-Timer → YouTube / Instagram / Snapchat → je 15 Min.<br><br>
+      <b style="color:#fbbf24">iPhone:</b> Einstellungen → Bildschirmzeit → App-Limits → 15 Min setzen.
+    </div>
+  </div>
+  <div class="ibox ibox-b">
+    <div class="ititle">⏰ Deine Alarme (Mo–Fr)</div>
+    <div class="alrow"><span>🌅</span><span class="altime">7:30</span><span class="allabel">Produktiver Morgenstart</span></div>
+    <div class="alrow"><span>⚡</span><span class="altime">9:00</span><span class="allabel">Erstes Ziel anpacken</span></div>
+    <div class="alrow"><span>🎯</span><span class="altime">11:00</span><span class="allabel">Halbzeit-Check</span></div>
+    <div class="alrow"><span>🍕</span><span class="altime">13:30</span><span class="allabel">Nach Mittagspause</span></div>
+    <div class="alrow"><span>📚</span><span class="altime">16:00</span><span class="allabel">Hausaufgaben & Lernen</span></div>
+    <div class="alrow"><span>💪</span><span class="altime">17:30</span><span class="allabel">Sport-Reminder</span></div>
+    <div class="alrow"><span>🌙</span><span class="altime">19:00</span><span class="allabel">Abend-Check</span></div>
+  </div>
+</div>
+
+</div>
+<script>
+var SK="lvlup_v5";
+var POOL=[
+  {id:"p1",cat:"sport",emoji:"🏃",title:"10 Min joggen",xp:30},
+  {id:"p2",cat:"sport",emoji:"💨",title:"Sprint-Intervalle 5x30 Sek",xp:35},
+  {id:"p3",cat:"sport",emoji:"🤸",title:"15 Min Stretching",xp:20},
+  {id:"p4",cat:"sport",emoji:"🚴",title:"Fahrrad fahren 20+ Min",xp:30},
+  {id:"p5",cat:"sport",emoji:"🦵",title:"3x15 Kniebeugen",xp:25},
+  {id:"p6",cat:"sport",emoji:"🪨",title:"Plank 3x30 Sekunden",xp:25},
+  {id:"p7",cat:"sport",emoji:"🤜",title:"3x10 Liegestütze",xp:25},
+  {id:"p8",cat:"sport",emoji:"🚶",title:"Spaziergang 20+ Min",xp:20},
+  {id:"p9",cat:"schule",emoji:"📝",title:"Alle Hausaufgaben erledigt",xp:40},
+  {id:"p10",cat:"schule",emoji:"🔁",title:"Letzten Stoff wiederholen",xp:30},
+  {id:"p11",cat:"schule",emoji:"📋",title:"Lernplan für Woche schreiben",xp:25},
+  {id:"p12",cat:"schule",emoji:"🧠",title:"25 Min Handy-frei lernen",xp:35},
+  {id:"p13",cat:"schule",emoji:"❓",title:"5 Fragen aus Stoff beantworten",xp:30},
+  {id:"p14",cat:"schule",emoji:"📚",title:"Kapitel zusammenfassen",xp:35},
+  {id:"p15",cat:"routine",emoji:"💧",title:"1,5L Wasser trinken",xp:20},
+  {id:"p16",cat:"routine",emoji:"📵",title:"1h kein Social Media",xp:35},
+  {id:"p17",cat:"routine",emoji:"🛏️",title:"Vor 23 Uhr ins Bett",xp:25},
+  {id:"p18",cat:"routine",emoji:"🌅",title:"Morgenroutine: Wasser + Plan",xp:30},
+  {id:"p19",cat:"routine",emoji:"📓",title:"3 gute Dinge aufschreiben",xp:20},
+  {id:"p20",cat:"routine",emoji:"🧹",title:"Schreibtisch aufräumen",xp:20},
+  {id:"p21",cat:"routine",emoji:"🎯",title:"Tagesziel setzen & erreichen",xp:40}
+];
+var CATS={sport:{label:"Sport",color:"#f97316"},schule:{label:"Schule",color:"#818cf8"},routine:{label:"Routine",color:"#34d399"}};
+var LVL_NAMES=["Anfänger","Kämpfer","Schüler","Athlet","Profi","Champion","Legende"];
+var LVL_T=[0,100,250,500,900,1500,2500];
+
+function today(){return new Date().toISOString().slice(0,10);}
+function daysSince(s){if(!s)return 999;return Math.floor((Date.now()-new Date(s))/86400000);}
+
+function ld(){
+  try{var r=localStorage.getItem(SK);return r?JSON.parse(r):{}}
+  catch(e){return{};}
+}
+function sv(){
+  try{localStorage.setItem(SK,JSON.stringify(S));}
+  catch(e){}
+}
+
+function getLvl(xp){
+  var l=0;
+  for(var i=0;i<LVL_T.length;i++){if(xp>=LVL_T[i])l=i;}
+  var nxt=LVL_T[l+1]||LVL_T[LVL_T.length-1]+500;
+  var prv=LVL_T[l];
+  return{l:l,name:LVL_NAMES[l]||"Legende",pct:Math.round(((xp-prv)/(nxt-prv))*100),next:nxt};
+}
+
+function pickTasks(lastDate,saved){
+  if(lastDate===today()&&saved&&saved.length>0)return saved;
+  var sh=POOL.slice().sort(function(){return Math.random()-0.5;});
+  var picked=[];
+  ["sport","schule","routine"].forEach(function(cat){
+    var f=sh.filter(function(t){return t.cat===cat;});
+    picked.push(Object.assign({},f[0],{done:false,size:1.0}));
+    picked.push(Object.assign({},f[1],{done:false,size:1.0}));
+  });
+  return picked;
+}
+
+var S={xp:0,streak:0,lastStreakDate:null,tasks:[],lastPickDate:null,pullupSets:0,pullupDone:false,lastPullupDate:null};
+
+function init(){
+  var d=ld();
+  var t=today();
+  var tasks=pickTasks(d.lastPickDate,d.tasks);
+  if(d.lastPickDate&&d.lastPickDate!==t){
+    if((d.tasks||[]).some(function(t){return!t.done;})){
+      var b=document.getElementById("failBanner");
+      b.style.display="block";
+      setTimeout(function(){b.style.display="none";},5000);
+    }
+  }
+  S.xp=d.xp||0;
+  S.streak=d.streak||0;
+  S.lastStreakDate=d.lastStreakDate||null;
+  S.tasks=tasks;
+  S.lastPickDate=t;
+  S.pullupSets=(d.lastPullupDate===t)?(d.pullupSets||0):0;
+  S.pullupDone=(d.lastPullupDate===t)||false;
+  S.lastPullupDate=d.lastPullupDate||null;
+  render();
+}
+
+function updStreak(){
+  var t=today();
+  if(S.lastStreakDate!==t){S.streak++;S.lastStreakDate=t;}
+}
+
+function showPop(msg,gain){
+  var el=document.getElementById("xpPop");
+  el.textContent=msg;
+  el.style.color=gain?"#34d399":"#f87171";
+  el.classList.add("show");
+  setTimeout(function(){el.classList.remove("show");},1500);
+}
+
+function checkTask(id){
+  var t=S.tasks.find(function(t){return t.id===id;});
+  if(!t||t.done)return;
+  t.done=true;
+  S.xp+=t.xp;
+  updStreak();
+  showPop("+"+t.xp+" XP ✨",true);
+  sv();render();
+  var el=document.getElementById("cel-"+id);
+  if(el){el.classList.add("show");setTimeout(function(){el.classList.remove("show");},1200);}
+}
+
+function failTask(id){
+  var t=S.tasks.find(function(t){return t.id===id;});
+  if(!t||t.done)return;
+  var lost=Math.floor(t.xp*0.3);
+  t.size=Math.max(0.55,(t.size||1.0)-0.15);
+  S.xp=Math.max(0,S.xp-lost);
+  showPop("-"+lost+" XP 💀",false);
+  sv();render();
+}
+
+function checkPullupSet(){
+  var avail=daysSince(S.lastPullupDate)>=2;
+  if(!avail||S.pullupDone)return;
+  S.pullupSets++;
+  if(S.pullupSets>=3){
+    S.pullupDone=true;
+    S.lastPullupDate=today();
+    S.xp+=50;
+    updStreak();
+    showPop("+50 XP 🏋️",true);
+  }
+  sv();render();
+}
+
+function switchTab(tab){
+  document.querySelectorAll(".tcontent").forEach(function(el){el.classList.remove("on");});
+  document.querySelectorAll(".tbtn").forEach(function(el){el.classList.remove("on");el.classList.add("off");});
+  document.getElementById("tab-"+tab).classList.add("on");
+  var idx=["tasks","sport","info"].indexOf(tab);
+  var btns=document.querySelectorAll(".tbtn");
+  if(idx>=0){btns[idx].classList.remove("off");btns[idx].classList.add("on");}
+}
+
+function render(){
+  var lvl=getLvl(S.xp);
+  document.getElementById("lvlLabel").textContent="Level "+(lvl.l+1)+" · "+lvl.name;
+  document.getElementById("xpNum").textContent=S.xp;
+  document.getElementById("streakNum").textContent=S.streak;
+  document.getElementById("lvlBar").style.width=lvl.pct+"%";
+  document.getElementById("xpCur").textContent=S.xp+" XP";
+  document.getElementById("xpNext").textContent="Nächstes: "+lvl.next+" XP";
+
+  var avail=daysSince(S.lastPullupDate)>=2;
+  var doneC=S.tasks.filter(function(t){return t.done;}).length+(S.pullupDone?1:0);
+  var totalC=S.tasks.length+(avail?1:0);
+  var pct=Math.round((doneC/Math.max(totalC,1))*100);
+  document.getElementById("sCount").innerHTML=doneC+"<span>/"+totalC+"</span>";
+  document.getElementById("sCount").style.color=doneC===totalC?"#34d399":"#fff";
+  document.getElementById("sLabel").textContent=doneC===totalC?"🎉 Alles erledigt!":"Noch "+(totalC-doneC)+" übrig";
+  document.getElementById("sBar").style.width=pct+"%";
+
+  // tasks
+  var tl=document.getElementById("taskList");
+  tl.innerHTML="";
+  S.tasks.forEach(function(task){
+    var cat=CATS[task.cat];
+    var scale=task.size||1.0;
+    var shrunk=scale<1.0;
+    var wrap=document.createElement("div");
+    wrap.className="taskwrap";
+    wrap.style.transform="scale("+scale+")";
+    wrap.style.transformOrigin="top left";
+    wrap.style.width=(100/scale)+"%";
+    wrap.style.opacity=task.done?"0.5":"1";
+    wrap.innerHTML='<div class="tcard'+(task.done?" done":shrunk?" shrunk":"")+'">'
+      +'<div class="celover" id="cel-'+task.id+'">🎉</div>'
+      +'<div class="trow">'
+      +'<span class="temoji">'+task.emoji+'</span>'
+      +'<div class="tinfo">'
+      +'<div class="ttitle'+(task.done?" done":"")+'">'+task.title+'</div>'
+      +'<div class="ttags">'
+      +'<span class="tag" style="color:'+cat.color+';background:'+cat.color+'22">'+cat.label+'</span>'
+      +'<span class="tag tagxp">+'+task.xp+' XP</span>'
+      +(shrunk&&!task.done?'<span class="tag tagshrink">⚠️ schrumpft!</span>':"")
+      +'</div></div>'
+      +(task.done
+        ?'<span style="font-size:22px">✅</span>'
+        :'<div class="tbtns">'
+          +'<button class="bfail" onclick="failTask(\''+task.id+'\')">✗</button>'
+          +'<button class="bcheck" style="background:linear-gradient(135deg,'+cat.color+',#818cf8)" onclick="checkTask(\''+task.id+'\')">✓</button>'
+          +'</div>')
+      +'</div></div>';
+    tl.appendChild(wrap);
+  });
+
+  // pullup
+  var pc=document.getElementById("pullupCard");
+  var ps=S.pullupSets; var pd=S.pullupDone;
+  var daysLeft=avail?0:(2-daysSince(S.lastPullupDate));
+  pc.innerHTML='<div class="pucard'+(pd?" done":avail?" avail":"")+'">'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+    +'<span style="font-size:28px">🏋️</span>'
+    +'<div><div style="font-weight:800;font-size:16px">Klimmzüge — 3 Sets</div>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,0.4)">'+(pd?"Heute erledigt ✅":avail?"Heute verfügbar!":"Pause — noch "+daysLeft+" Tag(e)")+'</div></div>'
+    +'<span style="margin-left:auto;font-size:12px;color:#fbbf24;background:rgba(251,191,36,0.15);padding:3px 9px;border-radius:99px;font-weight:700">+50 XP</span></div>'
+    +'<div class="setsrow">'
+    +[1,2,3].map(function(n){return'<div class="setbox'+(ps>=n?" done":"")+'">Set '+n+' '+(ps>=n?"✓":"")+'</div>';}).join("")
+    +'</div>'
+    +(avail&&!pd?'<button class="bpullup" onclick="checkPullupSet()">'+(ps>=3?"Alle 3 Sets ✓":"Set "+(ps+1)+" abhaken ✓")+'</button>':"")
+    +'<div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.6">💡 Alle 2 Tage = optimale Erholung & Muskelaufbau.<br>Noch kein Klimmzug? Negatives Klimmziehen hilft!</div>'
+    +'</div>';
+
+  // sport tasks
+  var sl=document.getElementById("sportList");
+  sl.innerHTML="";
+  S.tasks.filter(function(t){return t.cat==="sport";}).forEach(function(task){
+    var cat=CATS[task.cat];
+    var d2=document.createElement("div");
+    d2.style.marginBottom="10px";
+    d2.innerHTML='<div style="border-radius:14px;padding:13px 16px;background:'+(task.done?"rgba(52,211,153,0.08)":"rgba(255,255,255,0.04)")+';border:1px solid '+(task.done?"rgba(52,211,153,0.3)":"rgba(255,255,255,0.07)")+';display:flex;align-items:center;gap:10px;opacity:'+(task.done?0.6:1)+';">'
+      +'<span style="font-size:20px">'+task.emoji+'</span>'
+      +'<div style="flex:1"><div style="font-weight:700;font-size:13px;text-decoration:'+(task.done?"line-through":"none")+'">'+task.title+'</div>'
+      +'<span style="font-size:10px;color:#fbbf24">+'+task.xp+' XP</span></div>'
+      +(task.done
+        ?'<span style="font-size:18px">✅</span>'
+        :'<button class="bcheck" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,'+cat.color+',#818cf8)" onclick="checkTask(\''+task.id+'\')">✓</button>')
+      +'</div>';
+    sl.appendChild(d2);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
